@@ -1,27 +1,28 @@
 {
-  "name": "messer",
-  "version": "0.1.10",
-  "description": "Command-line messaging for Facebook Messenger",
+  "name": "messer-gui",
+  "version": "0.0.1",
+  "description": "Messer, but with a GUI",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/mjkaufer/Messer.git"
+    "url": "git+ssh://git@github.com/mjkaufer/Messer-GUI.git"
   },
   "author": "Matthew Kaufer (@mjkaufer)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mjkaufer/Messer/issues"
+    "url": "https://github.com/mjkaufer/Messer-GUI/issues"
   },
-  "homepage": "https://github.com/mjkaufer/Messer#readme",
+  "homepage": "https://github.com/mjkaufer/Messer-GUI#readme",
   "dependencies": {
+    "blessed": "^0.1.81",
     "facebook-chat-api": ">=1.0.5",
     "prompt": "^0.2.14"
   },
   "preferGlobal": true,
   "bin": {
-    "messer": "index.js"
+    "messer-gui": "index.js"
   }
 }
