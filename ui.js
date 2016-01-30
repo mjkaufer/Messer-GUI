@@ -89,12 +89,11 @@ form.on('submit', function(data) {
     //data.messageText
 });
 
-var title = blessed.log({
+var title = blessed.box({
 	parent: form,
 	mouse: true,
 	right: 3,
 	top: 2,
-    align: 'left',
     height: 3,
 	width: '80%+4',
 	valign: 'middle',
@@ -104,8 +103,7 @@ var title = blessed.log({
 		fg: lightSecondary,
     	bold: true,
 	},
-	scrollable: true,
-	content: "Chat Title"
+	scrollable: true
 	//alwaysScroll: true
 });
 
@@ -226,8 +224,13 @@ function updateOutput(threadIndex){
     try{
         var threadID = mostRecent[threadIndex]
         messageHistoryToOutput(chats[threadID].messageHistory)
+        updateTitle(threadID)
         screen.render()
     } catch (e){console.log(e)}
+}
+
+function updateTitle(threadID){
+    title.content = chats[threadID].name
 }
     
 
@@ -311,6 +314,7 @@ if(process.argv[1].indexOf("ui.js") != -1){
     output.add("ayy lmao")
     output.add("test\ntest")
     output.add("{bold}move cotton{/bold}")
+    title.content = "1111"
     setTimeout(function(){
         clearOutput()
         screen.render()
