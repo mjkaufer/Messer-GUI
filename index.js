@@ -2,6 +2,7 @@
 var login = require("facebook-chat-api");
 var chatData = require('./chatData.js')
 var lastThread = null;
+var blessedHelpers = require('blessed').helpers
 
 // var chats = {
 // 	/*
@@ -49,6 +50,7 @@ if(process.argv.length < 3){//user didn't store credentials in JSON, make them m
 				return true;
 			}
 		}], function (err, result) {
+			prompt.pause()
 			return authenticate(result)
 	});
 
@@ -63,7 +65,7 @@ if(process.argv.length < 3){//user didn't store credentials in JSON, make them m
 }
 
 function authenticate(credentials){//where credentials is the user's credentials as an object, fields `email` and `password
-	prompt.pause()
+		
 	login(credentials, function(err, api) {
 
 		if(err) return console.error(err);
@@ -170,12 +172,12 @@ function authenticate(credentials){//where credentials is the user's credentials
 
 			var from = message.threadName
 
-			var formattedMessage = message.senderName
+			var formattedMessage = "{bold}" + message.senderName + "{/bold}"
 			
 			if(message.type != "message"){
 				return
 			} else if(message.body !== undefined && message.body != ""){
-				formattedMessage += ": " + message.body
+				formattedMessage += ": " + blessedHelpers.escape(message.body)
 			} else if(message.attachments.length > 0){
 				var attachment = message.attachments[0]//only first attachment
 				var attachmentType = attachment.type.replace(/\_/g," ")
@@ -185,7 +187,6 @@ function authenticate(credentials){//where credentials is the user's credentials
 			return formattedMessage
 
 		}
-
 
 		api.listen(function cb(err, message) {
 			if(err)

@@ -114,6 +114,7 @@ var output = blessed.log({
 	mouse: true,
 	right: 3,
 	top: 5,
+    tags: true,
     align: 'left',
     height: '100%-11',
 	width: '80%+4',
@@ -121,8 +122,7 @@ var output = blessed.log({
 		bg: lightSecondary,
 		fg: darkPrimary,
 	},
-	scrollable: true,
-	content: "No messages."
+	scrollable: true
 	//alwaysScroll: true
 });
 
@@ -213,10 +213,22 @@ screen.on('keypress', function(ch, key) {
 // chatListTable.select = function(e){
 
 // }
-    
+var startIndex = 7
+
 chatListTable.on('select', function(el, em){
-    console.log("@" + el.index + "@")
+    //for some reason, the index of the 0th element is 7, so we'll just do some subtracting
+    var threadIndex = el.index - 7
+    updateOutput(threadIndex)
+    
 })
+
+function updateOutput(threadIndex){
+    try{
+        var threadID = mostRecent[threadIndex]
+        messageHistoryToOutput(chats[threadID].messageHistory)
+        screen.render()
+    } catch (e){console.log(e)}
+}
     
 
 // chatListTable.focus();
@@ -225,9 +237,20 @@ screen.append(chatListTable);
 
 exports.start = function(){
     console.log('ui started')
-    updateContent()
     screen.render();
     chatListTable.focus()
+    updateContent()
+    formatOutput()
+
+    updateOutput(0)
+    screen.render()
+}
+
+function messageHistoryToOutput(messageHistory){
+    clearOutput()
+    messageHistory.forEach(function(e){
+        output.add(e)
+    })
 }
 
 function shortenString(string, percentage){//percentage is from 0 to 1
@@ -264,10 +287,33 @@ function updateRecentChats(){
     updateChatList(chatNames)
 }
 
+function clearOutput(){
+    for(var i = 0; i < output.getLines().length; i++){
+        output.clearLine(i)
+    }
+    screen.render()
+}
+
+function formatOutput(){//so things are added starting at the bottom
+    for(var i = 0; i < process.stdout.rows; i++){
+        output.add(".\n")
+    }
+    clearOutput()
+}
+
 exports.updateChatList = updateChatList
+
+exports.escape = blessed.helpers.escape
 
 if(process.argv[1].indexOf("ui.js") != -1){
     exports.start()
-    updateChatList(["Dorem", "Ipsum", "Dolor", "Sit", "Amet", "LEEEROOYYYYY JENKINSS"])
+    updateChatList(["Dorem"])
+    output.add("ayy lmao")
+    output.add("test\ntest")
+    output.add("{bold}move cotton{/bold}")
+    setTimeout(function(){
+        clearOutput()
+        screen.render()
+    }, 3000)
     screen.render()
 }

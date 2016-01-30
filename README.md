@@ -32,7 +32,10 @@ Once you're logged in, you'll see a GUI. This has yet to be designed, so more in
 
 ## Todo
 
-* **Actually implement the GUI part**
+* Update message history with new messages (easy)
+* Ability to send messages (sorta easy)
+
+
 * Track received messages from users, and give the user the ability to look at them with a command
 * Make a Messenger-esque UI in the terminal
 	* Using `blessed`
