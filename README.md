@@ -12,7 +12,7 @@ Install `messer-gui` globally with `npm install messer-gui -g`, so you can use t
 
 Make sure you are running Node 4.x
 
-If you want to log in with your credentials stored in a file, do the following - otherwise, you'll log in by typing in your credentials each time you run Messer-GUI
+~~If you want to log in with your credentials stored in a file, do the following - otherwise, you'll log in by typing in your credentials each time you run Messer-GUI~~ This doesn't work right now, because any prompting messes with `blessed. I've tried both `prompt` and `read` - both make the `listtable` in `blessed` act really funky
 
 Create a `config.json` somewhere. Inside of the `config.json`, add
 
@@ -34,15 +34,9 @@ Once you're logged in, you'll see a GUI. This has yet to be designed, so more in
 
 * Update message history with new messages (easy)
 * Ability to send messages (sorta easy)
+* Make `blessed` work with `prompt` and/or `read` modules (tricky)
 
-
-* Track received messages from users, and give the user the ability to look at them with a command
-* Make a Messenger-esque UI in the terminal
-	* Using `blessed`
-	* Make an option to use prettier UI vs plain text
-* Be able to send to specific group chats
-	* Maybe something with `getThreadList` - a list of recent conversations with indices, and be able to reply to a conversation by inputting its index
-* Different colors for different chats?
+* Make an option to use prettier UI vs plain text
 * Giphy support - send random gif based on text user sends
 
 ## Warnings
