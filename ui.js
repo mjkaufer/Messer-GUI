@@ -1,4 +1,5 @@
 var blessed = require('blessed')
+var chatData = require('./chatData.js')
 var maxChatsToRender = 25
 var screen = blessed.screen({
     autoPadding: false,
@@ -20,9 +21,11 @@ var inverseBorder = {
     bg: lightSecondary
 }
 
-var chatList = []
-updateChatList([])
+// var chatList = []
 
+var chats = chatData.chats
+var mostRecent = chatData.mostRecent
+var friendIDMap = chatData.friendIDMap
 
 
 var chatListTable = blessed.listtable({
@@ -93,7 +96,7 @@ var title = blessed.log({
 	top: 2,
     align: 'left',
     height: 3,
-	width: '80%+6',
+	width: '80%+4',
 	valign: 'middle',
 	align: 'center',
 	style: {
@@ -113,7 +116,7 @@ var output = blessed.log({
 	top: 5,
     align: 'left',
     height: '100%-11',
-	width: '80%+6',
+	width: '80%+4',
 	style: {
 		bg: lightSecondary,
 		fg: darkPrimary,
@@ -132,7 +135,7 @@ var messageText = blessed.textbox({
 		bg: lightSecondary,
 		fg: darkPrimary,
 		border: {
-		  bg: darkPrimary
+		    bg: darkPrimary
 		},
 		focus: {
 		  //  border: {
@@ -212,13 +215,9 @@ screen.on('keypress', function(ch, key) {
 // }
     
 chatListTable.on('select', function(el, em){
-    console.log("AA")
-
-    
     console.log("@" + el.index + "@")
 })
     
-chatListTable.setData(chatList);
 
 // chatListTable.focus();
 
@@ -226,20 +225,49 @@ screen.append(chatListTable);
 
 exports.start = function(){
     console.log('ui started')
-
+    updateContent()
     screen.render();
     chatListTable.focus()
-
-    
 }
 
-exports.start()
+function shortenString(string, percentage){//percentage is from 0 to 1
+    var maxLength = parseInt(percentage * process.stdout.columns)
+    console.log(maxLength)
+    if(string.length <= maxLength)
+        return string
+    else if(maxLength < 6)
+        return string.substring(0, maxLength)
+    return string.substring(0, maxLength - 3).trim() + "..."
+}
 
 function updateChatList(recentChats){//array of the names of the recent chats
     recentChats = (recentChats.length == 0) ? ["No messages"] : recentChats
-    chatList = recentChats.map(function(e){return [e]})
-    chatList.unshift([chatListHeader])
+    var chatList = recentChats.map(function(e){return [shortenString(e, 0.2)]})
+    chatList.unshift([chatListHeader]);
+    chatListTable.setData(chatList)
+    
     return chatList
 }
 
+function updateContent(){
+    updateRecentChats()
+    screen.render()
+}
+
+function updateRecentChats(){
+    var chatNames = []
+    mostRecent.forEach(function(threadID){
+        chatNames.push(
+            chats[threadID].name
+        )
+    })
+    updateChatList(chatNames)
+}
+
 exports.updateChatList = updateChatList
+
+if(process.argv[1].indexOf("ui.js") != -1){
+    exports.start()
+    updateChatList(["Dorem", "Ipsum", "Dolor", "Sit", "Amet", "LEEEROOYYYYY JENKINSS"])
+    screen.render()
+}

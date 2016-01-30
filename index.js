@@ -1,29 +1,35 @@
 #! /usr/bin/env node
 var login = require("facebook-chat-api");
+var chatData = require('./chatData.js')
 var lastThread = null;
 
-chats = {
-	/*
-	threadID: {
-		participants: [participantIDs,...],
-		name: "chatname",
-		messageHistory: [
-			//messages, where index 0 is first and last index is most recent
-		]
-	}
+// var chats = {
+// 	/*
+// 	threadID: {
+// 		participants: [participantIDs,...],
+// 		name: "chatname",
+// 		messageHistory: [
+// 			//messages, where index 0 is first and last index is most recent
+// 		]
+// 	}
 	
-	*/
-}
+// 	*/
+// }
 
-mostRecent = [
-	//threadIDs sorted from most recent at 0 to least recent at index.length-1	
-]
+// var mostRecent = [
+// 	//threadIDs sorted from most recent at 0 to least recent at index.length-1	
+// ]
 
-friendIDMap = {
-	//friendId: friendName
-}
+// var friendIDMap = {
+// 	//friendId: friendName
+// }
 
-me = null;
+var chats = chatData.chats
+var mostRecent = chatData.mostRecent
+var friendIDMap = chatData.friendIDMap
+
+var me = null;
+
 
 
 if(process.argv.length < 3){//user didn't store credentials in JSON, make them manually enter credentials
@@ -64,7 +70,7 @@ function authenticate(credentials){//where credentials is the user's credentials
 		
 		console.log("Logged in as " + credentials.email)
 		me = api.getCurrentUserID()
-
+		exports.me = me
 		api.setOptions({
 			logLevel: "silent"
 		})
@@ -96,8 +102,7 @@ function authenticate(credentials){//where credentials is the user's credentials
 			if(err) return console.log(err)
 			for(var i = 0; i < threads.length; i++){
 				var thread = threads[i]
-				console.log(thread)
-				console.log(thread.name)
+
 				// console.log("------------")
 				// console.log(thread.name)
 				// console.log('"' + thread.snippet + '"')
@@ -111,15 +116,13 @@ function authenticate(credentials){//where credentials is the user's credentials
 				(function(threadCopy, index){
 					findNames(threadCopy.participants.filter(function(e){return e != me}), function(err, arr){
 						if(err){ return console.log(err)}
-						console.log("copy")
-						console.log(threadCopy.threadID)
+
 						
 						chats[threadCopy.threadID] = {
 							participants: threadCopy.participants,
 							name: threadCopy.name || arr[0].name,
 							messageHistory: []
 						}
-						console.log(chats)
 
 							
 						
@@ -137,7 +140,8 @@ function authenticate(credentials){//where credentials is the user's credentials
 							chatLoadComplete[index] = true
 
 							if(chatLoadComplete.every(function(e){return e == true})){
-								console.log(chats[threadCopy.threadID].messageHistory)
+								console.log("Done!")
+								createUI()
 							}else{
 								var percentage = chatLoadComplete.filter(function(e){return e}).length / chatLoadComplete.length * 100
 								console.log("Loading: " + percentage + "%")
@@ -159,9 +163,7 @@ function authenticate(credentials){//where credentials is the user's credentials
 		
 		function handleMessage(message, threadID){//bug - for some reason, group message objects ielded thru getThreadHistory have 'null' threadIDs
 			var formattedMessage = messageToText(message)
-			console.log(message)
 			chats[message.threadID || threadID].messageHistory.push(formattedMessage)//add message to chat history
-			console.log(formattedMessage)
 		}
 
 		function messageToText(message){//takes a message object and turns it into a piece of text
