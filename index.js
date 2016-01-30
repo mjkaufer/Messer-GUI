@@ -35,24 +35,27 @@ var me = null;
 
 if(process.argv.length < 3){//user didn't store credentials in JSON, make them manually enter credentials
 
-	//return console.log("Please specify a config JSON as your second argument!")
-	var prompt = require('prompt')
-	console.log("Enter your Facebook credentials - your password will not be visible as you type it in")
-	prompt.start();
+	return console.log("Please specify a config JSON as your second argument!")
 
-	prompt.get([{
-			name: 'email',
-			required: true
-		}, {
-			name: 'password',
-			hidden: true,
-			conform: function (value) {
-				return true;
-			}
-		}], function (err, result) {
-			prompt.pause()
-			return authenticate(result)
-	});
+	//have to comment this stuff out temporarily because blessed is not playing nice with prompt or other password prompting modules
+
+	// var prompt = require('prompt')
+	// console.log("Enter your Facebook credentials - your password will not be visible as you type it in")
+	// prompt.start();
+
+	// prompt.get([{
+	// 		name: 'email',
+	// 		required: true
+	// 	}, {
+	// 		name: 'password',
+	// 		hidden: true,
+	// 		conform: function (value) {
+	// 			return true;
+	// 		}
+	// 	}], function (err, result) {
+	// 		prompt.pause()
+	// 		return authenticate(result)
+	// });
 
 } else{
 	var fs = require('fs')
