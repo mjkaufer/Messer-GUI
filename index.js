@@ -19,7 +19,7 @@ if(process.argv.length < 3){//user didn't store credentials in JSON, make them m
 				return true;
 			}
 		}], function (err, result) {
-			authenticate(result)
+			return authenticate(result)
 	});
 
 } else{
@@ -33,13 +33,12 @@ if(process.argv.length < 3){//user didn't store credentials in JSON, make them m
 }
 
 function authenticate(credentials){//where credentials is the user's credentials as an object, fields `email` and `password
+	prompt.pause()
 	login(credentials, function(err, api) {
 
 		if(err) return console.error(err);
 		
 		var me = api.getCurrentUserID()
-
-		var blessed = require('blessed')
 
 		console.log("Logged in as " + credentials.email)
 
@@ -67,7 +66,7 @@ function authenticate(credentials){//where credentials is the user's credentials
 			});
 		}
 		
-		var chats = {
+		chats = {
 			/*
 			threadID: {
 				participants: [participantIDs,...],
@@ -80,7 +79,7 @@ function authenticate(credentials){//where credentials is the user's credentials
 			*/
 		}
 		
-		var mostRecent = [
+		mostRecent = [
 			//threadIDs sorted from most recent at 0 to least recent at index.length-1	
 		]
 		
@@ -114,8 +113,16 @@ function authenticate(credentials){//where credentials is the user's credentials
 							messageHistory: []
 						}
 						chatLoadComplete[index] = true
-						if(chatLoadComplete.every(function(e){return e == true}))
-							createUI()
+						if(chatLoadComplete.every(function(e){return e == true})){
+							
+							
+							api.getThreadHistory(threadCopy.threadID, 0, 10, Date.now(), function(err, history){
+								console.log(history)
+								createUI()
+							})
+							
+							// createUI()
+						}
 						else{
 							var percentage = chatLoadComplete.filter(function(e){return e}).length / chatLoadComplete.length * 100
 							console.log("Loading: " + percentage + "%")
@@ -130,11 +137,8 @@ function authenticate(credentials){//where credentials is the user's credentials
 		})
 		
 
+		function messageToText(message){//takes a message object and turns it into a piece of text
 
-		api.listen(function cb(err, message) {
-			if(err)
-				return console.log(err)
-			
 			var from = message.threadName
 			var threadID = message.threadID
 
@@ -149,6 +153,19 @@ function authenticate(credentials){//where credentials is the user's credentials
 				var attachmentType = attachment.type.replace(/\_/g," ")
 				formattedMessage += " sent a " + attachmentType
 			}
+			
+			return formattedMessage
+
+		}
+
+
+		api.listen(function cb(err, message) {
+			if(err)
+				return console.log(err)
+			
+			var threadID = message.threadID
+
+			var formattedMessage = messageToText(message)
 			
 			if(mostRecent.indexOf(threadID) != -1)
 				mostRecent.splice(0, 0, mostRecent.splice(mostRecent.indexOf(threadID), 1)[0] );
@@ -170,11 +187,15 @@ function authenticate(credentials){//where credentials is the user's credentials
 			
 		});
 		
+		
 		function createUI(){
 			console.log("Ready!")
 			console.log(chats)
 			console.log("\n----\n")
 			console.log(friendIDMap)
+			var ui = require('./ui.js')
+			
+			ui.start()
 		}
 
 	});
