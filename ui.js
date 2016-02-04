@@ -1,5 +1,5 @@
 var blessed = require('blessed')
-var chatData = require('./chatData.js')
+var chatLib = require('./chatLib.js')
 var maxChatsToRender = 25
 var screen = blessed.screen({
     autoPadding: false,
@@ -23,9 +23,10 @@ var inverseBorder = {
 
 // var chatList = []
 
-var chats = chatData.chats
-var mostRecent = chatData.mostRecent
-var friendIDMap = chatData.friendIDMap
+var chats = chatLib.chats
+var mostRecent = chatLib.mostRecent
+var friendIDMap = chatLib.friendIDMap
+var api = chatLib.api
 
 
 var chatListTable = blessed.listtable({
@@ -179,7 +180,45 @@ messageText.on('focus', function() {
 });
 
 submitButton.on('press', function() {
-	form.submit();
+	
+    var messageToSend = messageText.getValue().trim()
+    var threadID = mostRecent[currentIndex]
+
+    if(!(api && threadID && messageToSend.length > 0))
+        return false;
+
+    form.submit()
+    
+    api.sendMessage(messageToSend, threadID, function(e,messageObject){
+
+        if(e)
+            return console.log(e)
+
+        var fakeMessageObject = {
+            threadID: threadID,
+            threadName: chats[threadID].name,
+            senderName: friendIDMap[chatLib.me].name,
+            body: messageToSend
+        }
+
+        chatLib.handleMessage(fakeMessageObject, threadID)//this should push to messageHistory
+
+        updateOutput(threadID)
+
+        output.add(JSON.stringify(fakeMessageObject))
+        // messageText.focus()//to do this, we need to integrate with tabevent
+        messageText.clearValue()
+        screen.render()
+
+    })
+
+    screen.render()
+    // console.log("ay")
+    
+
+    return true;
+    
+    
 });
 
 
@@ -212,17 +251,24 @@ screen.on('keypress', function(ch, key) {
 
 // }
 var startIndex = 7
+var currentIndex = 0
+var currentThreadID = getThreadID(currentIndex)
 
 chatListTable.on('select', function(el, em){
     //for some reason, the index of the 0th element is 7, so we'll just do some subtracting
-    var threadIndex = el.index - 7
-    updateOutput(threadIndex)
+    currentIndex = el.index - startIndex
+    currentThreadID = getThreadID(currentIndex)
+    updateOutput(currentThreadID)
+
     
 })
 
-function updateOutput(threadIndex){
+function getThreadID(index){
+    return mostRecent[index]
+}
+
+function updateOutput(threadID){
     try{
-        var threadID = mostRecent[threadIndex]
         messageHistoryToOutput(chats[threadID].messageHistory)
         updateTitle(threadID)
         screen.render()
@@ -245,7 +291,7 @@ exports.start = function(){
     updateContent()
     formatOutput()
 
-    updateOutput(0)
+    updateOutput(getThreadID(0))
     screen.render()
 }
 
